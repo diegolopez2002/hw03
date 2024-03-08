@@ -33,10 +33,9 @@ available with qualified names, such as List.intersperse, etc.
 -}
 
 module Main where
-  
-  import Prelude hiding (reverse, concat, zip, (++), takeWhile, all)
-  import Test.HUnit
-  import Main as Main
+import Prelude hiding (reverse, concat, zip, (++), takeWhile, all)
+import Test.HUnit
+
 
 
 
@@ -56,11 +55,11 @@ later in the file.
 
 main :: IO ()
 main = do
-  runTestTT testStyle
-  runTestTT testLists
-  runTestTT testHO
-  runTestTT testFoldr
-  runTestTT testTree
+  _ <- runTestTT testStyle
+  _ <- runTestTT testLists
+  _ <- runTestTT testHO
+  _ <- runTestTT testFoldr
+  _ <- runTestTT testTree
   return ()
 
 
