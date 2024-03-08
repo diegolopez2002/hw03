@@ -157,8 +157,8 @@ reverse' l = reverseAux l []
 
 treverse :: Test
 treverse = "reverse" ~: TestList
-    [ reverse' [3,2,1] ~?= ([1,2,3] :: [Int])
-    , reverse' [1]     ~?= ([1]     :: [Int])
+    [ Main.reverse' [3,2,1] ~?= ([1,2,3] :: [Int])
+    , Main.reverse' [1]     ~?= ([1]     :: [Int])
     ]
 
 -- Part Four
@@ -174,9 +174,9 @@ zip' xs ys = g 0 xs ys
 tzip :: Test
 tzip = "zip" ~:
   TestList
-    [ zip' "abc" [True,False,True] ~?= [('a',True),('b',False), ('c', True)]
-    , zip' "abc" [True]            ~?= [('a', True)]
-    , zip' [] []                   ~?= ([] :: [(Int,Int)])
+    [ Main.zip' "abc" [True,False,True] ~?= [('a',True),('b',False), ('c', True)]
+    , Main.zip' "abc" [True]            ~?= [('a', True)]
+    , Main.zip' [] []                   ~?= ([] :: [(Int,Int)])
     ]
 
 --------------------------------------------------------------------------------
@@ -551,9 +551,9 @@ tails' = para (\x xs rest -> (x:xs) : rest) [[]]
 
 ttails :: Test
 ttails = "tails'" ~: TestList
-  [ tails' "abc" ~?= ["abc", "bc", "c", ""]
-  , tails' ""    ~?= [""]
-  , tails' "a"   ~?= ["a",""]
+  [ Main.tails' "abc" ~?= ["abc", "bc", "c", ""]
+  , Main.tails' ""    ~?= [""]
+  , Main.tails' "a"   ~?= ["a",""]
   ]
 
 {- 
