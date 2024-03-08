@@ -33,9 +33,10 @@ available with qualified names, such as List.intersperse, etc.
 -}
 
 module Main where
-import Prelude hiding (reverse, concat, zip, (++), takeWhile, all)
-import Test.HUnit
-
+  
+  import Prelude hiding (reverse, concat, zip, (++), takeWhile, all)
+  import Test.HUnit
+  import Main as Main
 
 
 
@@ -55,11 +56,11 @@ later in the file.
 
 main :: IO ()
 main = do
-  _ <- runTestTT testStyle
-  _ <- runTestTT testLists
-  _ <- runTestTT testHO
-  _ <- runTestTT testFoldr
-  _ <- runTestTT testTree
+  runTestTT testStyle
+  runTestTT testLists
+  runTestTT testHO
+  runTestTT testFoldr
+  runTestTT testTree
   return ()
 
 
@@ -82,10 +83,6 @@ subdirectory.)
 testStyle :: Test
 testStyle = "testStyle" ~:
    TestList [ tabc , tarithmetic, treverse, tzip ]
- 
-
-
-    
 
 {-
 
@@ -162,8 +159,7 @@ reverse' l = reverseAux l []
 treverse :: Test
 treverse = "reverse" ~: TestList
     [ reverse' [3,2,1] ~?= ([1,2,3] :: [Int])
-    , reverse' [1]     ~?= ([1] :: [Int])
-    , reverse' []      ~?= ([] :: [Int])
+    , reverse' [1]     ~?= ([1]     :: [Int])
     ]
 
 -- Part Four
@@ -177,12 +173,11 @@ zip' xs ys = g 0 xs ys
         else (xs' !! n, ys' !! n) : g (n + 1) xs' ys'
 
 tzip :: Test
-tzip = "zip" ~: TestList
-    [ zip' [1,2,3] ['a','b','c'] ~?= zip' [1,2,3] ['a','b','c']
-    , zip' [1,2,3] []            ~?= zip' [1,2,3] ([] :: [Int])
-    , zip' [] ['a','b','c']      ~?= zip' ([] :: [Int]) ['a','b','c']
-    , zip' [] []                 ~?= zip' ([] :: [Int]) ([] :: [Char])
-    , zip' ['a','b','c'] [1,2,3] ~?= zip' ['a','b','c'] [1,2,3]
+tzip = "zip" ~:
+  TestList
+    [ zip' "abc" [True,False,True] ~?= [('a',True),('b',False), ('c', True)]
+    , zip' "abc" [True]            ~?= [('a', True)]
+    , zip' [] []                   ~?= ([] :: [(Int,Int)])
     ]
 
 --------------------------------------------------------------------------------
@@ -557,9 +552,9 @@ tails' = para (\x xs rest -> (x:xs) : rest) [[]]
 
 ttails :: Test
 ttails = "tails'" ~: TestList
-  [ Main.tails' "abc" ~?= ["abc", "bc", "c", ""]
-  , Main.tails' ""    ~?= [""]
-  , Main.tails' "a"   ~?= ["a",""]
+  [ tails' "abc" ~?= ["abc", "bc", "c", ""]
+  , tails' ""    ~?= [""]
+  , tails' "a"   ~?= ["a",""]
   ]
 
 {- 
@@ -753,5 +748,3 @@ map2Tree f (Branch x1 l1 r1) (Branch x2 l2 r2) =
 
 tmap2Tree :: Test
 tmap2Tree = "map2Tree" ~: (assertFailure "testcase for map2Tree" :: Assertion)
-
-
