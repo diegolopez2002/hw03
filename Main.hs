@@ -32,11 +32,13 @@ available with qualified names, such as List.intersperse, etc.
 
 -}
 
-module Main where
-  
-  import Prelude hiding (reverse, concat, zip, (++), takeWhile, all)
-  import Test.HUnit
-  import Main as Main
+
+
+import Prelude hiding (reverse, concat, zip, (++), takeWhile, all, filter, foldl, foldl1, last, length, map, reverse)
+
+import Test.HUnit
+
+import Main where
 
 
 
@@ -79,6 +81,8 @@ subdirectory.)
 --------------------------------------------------------------------------------
 -- Problem (Good Style)
 -------------------------------------------------------------------------------- 
+
+
 
 testStyle :: Test
 testStyle = "testStyle" ~:
@@ -221,7 +225,7 @@ testLists = "testLists" ~: TestList
 
 minimumMaybe :: [Int] -> Maybe Int
 minimumMaybe [] = Nothing
-minimumMaybe (x:xs) = Just $ foldl min x xs
+minimumMaybe (x:xs) = Just $ foldr min x xs
 
 tminimumMaybe :: Test
 tminimumMaybe = "minimumMaybe" ~: TestList
@@ -501,6 +505,7 @@ testFoldr = TestList [ tconcat',  tstartsWith', tendsWith', ttails, tcountSub' ]
 --
 
 concat' :: [[a]] -> [a]
+
 concat' = foldr (++) []
 
 tconcat' :: Test
@@ -602,6 +607,7 @@ redefine the function above so that the test cases still pass.
 -- NOTE: use para for this one!
 
 endsWith' :: String -> String -> Bool
+
 endsWith' xs ys = endsWithHelper xs ys (length xs) (length ys)
   where
     endsWithHelper _ [] _ _ = True
@@ -632,7 +638,7 @@ tendsWith' = "endsWith'" ~: TestList
 -- (You may use the para and startsWith' functions in countSub'.)
 
 
-  countSub' :: String -> String -> Int
+countSub' :: String -> String -> Int
 countSub' sub = foldr (\xs acc -> (if startsWith' sub xs then 1 else 0) + acc) 0 . tails'
 
 tcountSub' :: Test
