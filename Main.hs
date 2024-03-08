@@ -117,67 +117,63 @@ abc x y z =
   if x
     then if y
            then True
-           else if x && z
-                  then True
-                  else False
+           else x && z
     else False
 
 tabc :: Test
-tabc = "abc" ~: TestList
-  [ abc True False True  ~?= True
-  , abc True False False ~?= False
-  , abc False True True  ~?= False
-  ]
+tabc = "abc" ~:
+  TestList
+    [ abc True False True  ~?= True
+    , abc True False False ~?= False
+    , abc False True True  ~?= False
+    ]
 
 -- Part Two
 
-arithmetic :: ((Int, Int), Int) -> ((Int,Int), Int) -> (Int, Int, Int)
-arithmetic x1 x2 =
-  let a = fst (fst x1)
-      b = snd (fst x1)
-      c = snd x1
-      d = fst (fst x2)
-      e = snd (fst x2)
-      f = snd x2
-  in (((b*f) - (c*e)), ((c*d) - (a*f)), ((a*e)-(b*d)))
+arithmetic :: ((Int, Int), Int) -> ((Int, Int), Int) -> (Int, Int, Int)
+arithmetic ((a, b), c) ((d, e), f) =
+  let result1 = b*f - c*e
+      result2 = c*d - a*f
+      result3 = a*e - b*d
+  in (result1, result2, result3)
 
 tarithmetic :: Test
 tarithmetic = "arithmetic" ~:
-   TestList
-     [ arithmetic ((1,2),3) ((4,5),6) ~?= (-3,6,-3)
-     , arithmetic ((3,2),1) ((4,5),6) ~?= (7,-14,7)
-     ]
+  TestList
+    [ arithmetic ((1, 2), 3) ((4, 5), 6) ~?= (-3, 6, -3)
+    , arithmetic ((3, 2), 1) ((4, 5), 6) ~?= (7, -14, 7)
+    ]
 
 -- Part Three
 
 reverse' :: [a] -> [a]
-reverse' l = reverseAux l []
+reverse' = reverseAux []
   where
-    reverseAux [] acc = acc
-    reverseAux (x:xs) acc = reverseAux xs (x : acc)
+    reverseAux acc [] = acc
+    reverseAux acc (x:xs) = reverseAux (x : acc) xs
 
 treverse :: Test
-treverse = "reverse" ~: TestList
-    [ reverse' [3,2,1] ~?= ([1,2,3] :: [Int])
-    , reverse' [1]     ~?= ([1]     :: [Int])
+treverse = "reverse" ~:
+  TestList
+    [ reverse' [3, 2, 1] ~?= [1, 2, 3 :: Int]
+    , reverse' [1]       ~?= [1 :: Int]
     ]
 
 -- Part Four
 
-zip' :: [a] -> [b] -> [(a,b)]
-zip' xs ys = g 0 xs ys
+zip' :: [a] -> [b] -> [(a, b)]
+zip' xs ys = zipAux xs ys
   where
-    g n xs' ys' =
-      if n == length xs' || n == length ys'
-        then []
-        else (xs' !! n, ys' !! n) : g (n + 1) xs' ys'
+    zipAux [] _          = []
+    zipAux _ []          = []
+    zipAux (x:xs') (y:ys') = (x, y) : zipAux xs' ys'
 
 tzip :: Test
 tzip = "zip" ~:
   TestList
-    [ zip' "abc" [True,False,True] ~?= [('a',True),('b',False), ('c', True)]
-    , zip' "abc" [True]            ~?= [('a', True)]
-    , zip' [] []                   ~?= ([] :: [(Int,Int)])
+    [ zip' "abc" [True, False, True] ~?= [('a', True), ('b', False), ('c', True)]
+    , zip' "abc" [True]              ~?= [('a', True)]
+    , zip' [] []                     ~?= ([] :: [(Int, Int)])
     ]
 
 --------------------------------------------------------------------------------
@@ -222,7 +218,6 @@ testLists = "testLists" ~: TestList
 -- Nothing
 -- >>> minumumMaybe [2,1,3]
 -- Just 1 
-
 
 minimumMaybe :: [Int] -> Maybe Int
 minimumMaybe [] = Nothing
@@ -275,7 +270,6 @@ tstartsWith = "startsWith" ~: TestList
 -- >>> "World" `endsWith` "Hello World!"
 -- False
 
-
 endsWith :: String -> String -> Bool
 endsWith [] _ = True
 endsWith _ [] = False
@@ -315,7 +309,13 @@ transpose ([]:_) = []
 transpose xss = map head xss : transpose (map tail xss)
 
 ttranspose :: Test
-ttranspose = "transpose" ~: (assertFailure "testcase for transpose" :: Assertion)
+ttranspose = "transpose" ~: TestList
+  [ transpose [[1,2,3],[4,5,6]] ~?= [[1,4],[2,5],[3,6]]
+  , transpose []                ~?= []
+  , transpose [[]]              ~?= []
+  , transpose [[3,4,5]]         ~?= [[3],[4],[5]]
+  , transpose [[1,2],[3,4,5]]   ~?= [[1,3],[2,4]]
+  ]
 
 -- Part Five
 
@@ -330,16 +330,16 @@ ttranspose = "transpose" ~: (assertFailure "testcase for transpose" :: Assertion
 countSub :: String -> String -> Int
 countSub _ [] = 0
 countSub sub str
-  | sub `startsWith` str = 1 + countSub sub (drop (length sub) str)
-  | otherwise = countSub sub (tail str)
+  | sub `startsWith` str = 1 + countSub sub (drop 1 str)
+  | otherwise = countSub sub (drop 1 str)
 
 tcountSub :: Test
 tcountSub = "countSub" ~: TestList
-  [ countSub "aa" "aaa" ~?= 2
-  , countSub "" "aaac" ~?= 5
-  , countSub "cat" "I have a cat named Catalyst." ~?= 1
-  , countSub "an" "banana" ~?= 2
-  , countSub "ab" "abababab" ~?= 4
+  [ countSub "aa" "aaa"                               ~?= 2
+  , countSub "" "aaac"                                ~?= 5
+  , countSub "cat" "I have a cat named Catalyst."     ~?= 1
+  , countSub "an" "banana"                            ~?= 2
+  , countSub "ab" "abababab"                          ~?= 4
   , countSub "z" "The quick brown fox jumps over the lazy dog." ~?= 0
   ]
 
@@ -377,7 +377,12 @@ takeWhile p (x:xs)
   | otherwise = []
 
 ttakeWhile :: Test
-ttakeWhile = "takeWhile" ~: (assertFailure "testcase for takeWhile" :: Assertion)
+ttakeWhile = "takeWhile" ~: TestList
+  [ takeWhile (< 3) [1,2,3,4,1,2,3,4] ~?= [1,2]
+  , takeWhile (< 9) [1,2,3]           ~?= [1,2,3]
+  , takeWhile (< 0) [1,2,3]           ~?= []
+  , takeWhile even [2,4,6,7,8]        ~?= [2,4,6]
+  ]
 
 -- | `find pred lst` returns the first element of the list that
 -- satisfies the predicate. Because no element may do so, the
@@ -393,7 +398,11 @@ find p (x:xs)
   | otherwise = find p xs
 
 tfind :: Test
-tfind = "find" ~: (assertFailure "testcase for find" :: Assertion)
+tfind = "find" ~: TestList
+  [ find odd [0,2,3,4] ~?= Just 3
+  , find (> 5) [1,3,5,7] ~?= Just 7
+  , find even [1,3,5,7] ~?= Nothing
+  ]
 
 
 -- | `all pred lst` returns `False` if any element of `lst`
@@ -409,7 +418,13 @@ all p (x:xs)
   | otherwise = False
 
 tall :: Test
-tall = "all" ~: (assertFailure "testcase for all" :: Assertion)
+tall = "all" ~: TestList
+  [ all odd [1,2,3] ~?= False
+  , all even [2,4,6,8] ~?= True
+  , all (> 0) [1,2,3,4] ~?= True
+  , all (> 5) [1,2,3,4] ~?= False
+  ]
+
 -- | `map2 f xs ys` returns the list obtained by applying `f` to
 -- to each pair of corresponding elements of `xs` and `ys`. If
 -- one list is longer than the other, then the extra elements
@@ -428,9 +443,13 @@ map2 _ [] _ = []
 map2 _ _ [] = []
 map2 f (x:xs) (y:ys) = f x y : map2 f xs ys
 
-
 tmap2 :: Test
-tmap2 = "map2" ~: (assertFailure "testcase for map2" :: Assertion)
+tmap2 = "map2" ~: TestList
+  [ map2 (+) [1,2] [3,4] ~?= [4,6]
+  , map2 (*) [1,2,3] [4,5] ~?= [4,10]
+  , map2 (++) ["Hello", "World"] ["!", "?"] ~?= ["Hello!", "World?"]
+  , map2 (\x y -> x - y) [10, 5, 8] [2, 3, 1] ~?= [8, 2, 7]
+  ]
 
 -- | Apply a partial function to all the elements of the list,
 -- keeping only valid outputs.
@@ -439,6 +458,7 @@ tmap2 = "map2" ~: (assertFailure "testcase for map2" :: Assertion)
 -- [0.0,2.0]
 --
 -- (where `root` is defined below.)
+
 mapMaybe :: (a -> Maybe b) -> [a] -> [b]
 mapMaybe _ [] = []
 mapMaybe f (x:xs) =
@@ -447,9 +467,11 @@ mapMaybe f (x:xs) =
     Nothing -> mapMaybe f xs
 
 tmapMaybe :: Test
-tmapMaybe = "mapMaybe" ~: (assertFailure "testcase for mapMaybe" :: Assertion)
-
-
+tmapMaybe = "mapMaybe" ~: TestList
+  [ mapMaybe root [0.0, -1.0, 4.0] ~?= [0.0, 2.0]
+  , mapMaybe (\x -> if x `mod` 2 == 0 then Just x else Nothing) [1,2,3,4,5] ~?= [2, 4]
+  , mapMaybe (\x -> if x > 5 then Just (x * 2) else Nothing) [2, 4, 7, 10] ~?= [14, 20]
+  ]
 
 root :: Double -> Maybe Double
 root d = if d < 0.0 then Nothing else Just $ sqrt d
@@ -478,6 +500,17 @@ testFoldr = TestList [ tconcat',  tstartsWith', tendsWith', ttails, tcountSub' ]
 -- [1,2,3,4,5,6,7,8,9]
 --
 
+concat' :: [[a]] -> [a]
+concat' = foldr (++) []
+
+tconcat' :: Test
+tconcat' = "concat'" ~: TestList
+  [ concat' [[1,2,3],[4,5,6],[7,8,9]] ~?= [1,2,3,4,5,6,7,8,9]
+  , concat' [[1],[2],[3]]             ~?= [1,2,3]
+  , concat' [[]]                      ~?= ([] :: [Int])
+  , concat' [[],[],[]]                ~?= ([] :: [Int])
+  ]
+
 {-
 
 NOTE: remember you cannot use any list functions from the Prelude or
@@ -486,16 +519,7 @@ function. Instead, define it yourself.
 
 -}
 
-concat' :: [[a]] -> [a]
-concat' [] = []
-concat' (x:xs) = concatHelper x (concat' xs)
-  where
-    concatHelper :: [a] -> [a] -> [a]
-    concatHelper [] ys = ys
-    concatHelper (y:ys) zs = y : concatHelper ys zs
 
-tconcat' :: Test
-tconcat' = "concat" ~: (assertFailure "testcase for concat" :: Assertion)
 
 -- | The 'startsWith' function takes two strings and returns 'True'
 -- iff the first is a prefix of the second.
@@ -587,7 +611,6 @@ endsWith' xs ys = endsWithHelper xs ys (length xs) (length ys)
       | x /= y = False       -- If the characters don't match, not a suffix
       | otherwise = endsWithHelper xs' ys' (lenX - 1) (lenY - 1)
 
-
 tendsWith' :: Test
 tendsWith' = "endsWith'" ~: TestList
   [ "ld!" `endsWith'` "Hello World!"  ~?= True
@@ -608,7 +631,8 @@ tendsWith' = "endsWith'" ~: TestList
 
 -- (You may use the para and startsWith' functions in countSub'.)
 
-countSub' :: String -> String -> Int
+
+  countSub' :: String -> String -> Int
 countSub' sub = foldr (\xs acc -> (if startsWith' sub xs then 1 else 0) + acc) 0 . tails'
 
 tcountSub' :: Test
@@ -686,7 +710,11 @@ invertTree Empty = Empty
 invertTree (Branch (x, y) left right) = Branch (y, x) (invertTree left) (invertTree right)
 
 tinvertTree :: Test
-tinvertTree = "invertTree" ~: (assertFailure "testcase for invertTree" :: Assertion)
+tinvertTree = "invertTree" ~: TestList
+  [ invertTree (Branch ("a",True) Empty Empty) ~?= Branch (True,"a") Empty Empty
+  , invertTree (Branch (1, "one") (Branch (2, "two") Empty Empty) (Branch (3, "three") Empty Empty))
+      ~?= Branch ("one", 1) (Branch ("two", 2) Empty Empty) (Branch ("three", 3) Empty Empty)
+  ]
 
 
 -- `takeWhileTree`, applied to a predicate `p` and a tree `t`,
@@ -706,11 +734,15 @@ tree1 = Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)
 takeWhileTree :: (a -> Bool) -> Tree a -> Tree a
 takeWhileTree _ Empty = Empty
 takeWhileTree p (Branch x l r)
-  | p x = Branch x (takeWhileTree p l) (takeWhileTree p r)
+  | p x       = Branch x (takeWhileTree p l) (takeWhileTree p r)
   | otherwise = Empty
 
 ttakeWhileTree :: Test
-ttakeWhileTree = "takeWhileTree" ~: (assertFailure "testcase for takeWhileTree" :: Assertion)
+ttakeWhileTree = "takeWhileTree" ~: TestList
+  [ takeWhileTree (< 3) (Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)) ~?= Branch 1 (Branch 2 Empty Empty) Empty
+  , takeWhileTree (< 0) (Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)) ~?= Empty
+  , takeWhileTree (< 5) (Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)) ~?= Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)
+  ]
 
 -- `allTree pred tree` returns `False` if any element of `tree`
 -- fails to satisfy `pred` and `True` otherwise. For example:
@@ -724,7 +756,12 @@ allTree _ Empty = True
 allTree p (Branch x l r) = p x && allTree p l && allTree p r
 
 tallTree :: Test
-tallTree = "allTree" ~: (assertFailure "testcase for allTree" :: Assertion)
+tallTree = "allTree" ~: TestList
+  [ allTree odd (Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)) ~?= False
+  , allTree even (Branch 2 (Branch 4 Empty Empty) (Branch 6 Empty Empty)) ~?= True
+  , allTree (> 0) (Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)) ~?= True
+  , allTree (> 5) (Branch 1 (Branch 2 Empty Empty) (Branch 3 Empty Empty)) ~?= False
+  ]
 
 -- WARNING: This one is a bit tricky!  (Hint: use `foldTree` and remember
 --  that the value returned by `foldTree` can itself be a function. If you are
@@ -747,4 +784,10 @@ map2Tree f (Branch x1 l1 r1) (Branch x2 l2 r2) =
   Branch (f x1 x2) (map2Tree f l1 l2) (map2Tree f r1 r2)
 
 tmap2Tree :: Test
-tmap2Tree = "map2Tree" ~: (assertFailure "testcase for map2Tree" :: Assertion)
+tmap2Tree = "map2Tree" ~: TestList
+  [ map2Tree (+) (Branch 1 Empty (Branch 2 Empty Empty)) (Branch 3 Empty Empty) ~?= Branch 4 Empty (Branch 2 Empty Empty)
+  , map2Tree (\x y -> x == y) (Branch 'a' (Branch 'b' Empty Empty) (Branch 'c' Empty Empty)) (Branch 'a' (Branch 'c' Empty Empty) (Branch 'd' Empty Empty))
+      ~?= Branch True (Branch False Empty Empty) (Branch False Empty Empty)
+  , map2Tree (*) (Branch 2 (Branch 4 Empty Empty) (Branch 6 Empty Empty)) (Branch 3 (Branch 5 Empty Empty) (Branch 7 Empty Empty))
+      ~?= Branch 6 (Branch 20 Empty Empty) (Branch 42 Empty Empty)
+  ]
