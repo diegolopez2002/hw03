@@ -82,6 +82,10 @@ subdirectory.)
 testStyle :: Test
 testStyle = "testStyle" ~:
    TestList [ tabc , tarithmetic, treverse, tzip ]
+ 
+
+
+    
 
 {-
 
@@ -157,8 +161,9 @@ reverse' l = reverseAux l []
 
 treverse :: Test
 treverse = "reverse" ~: TestList
-    [ Main.reverse' [3,2,1] ~?= ([1,2,3] :: [Int])
-    , Main.reverse' [1]     ~?= ([1]     :: [Int])
+    [ reverse' [3,2,1] ~?= ([1,2,3] :: [Int])
+    , reverse' [1]     ~?= ([1] :: [Int])
+    , reverse' []      ~?= ([] :: [Int])
     ]
 
 -- Part Four
@@ -172,11 +177,12 @@ zip' xs ys = g 0 xs ys
         else (xs' !! n, ys' !! n) : g (n + 1) xs' ys'
 
 tzip :: Test
-tzip = "zip" ~:
-  TestList
-    [ Main.zip' "abc" [True,False,True] ~?= [('a',True),('b',False), ('c', True)]
-    , Main.zip' "abc" [True]            ~?= [('a', True)]
-    , Main.zip' [] []                   ~?= ([] :: [(Int,Int)])
+tzip = "zip" ~: TestList
+    [ zip' [1,2,3] ['a','b','c'] ~?= zip' [1,2,3] ['a','b','c']
+    , zip' [1,2,3] []            ~?= zip' [1,2,3] ([] :: [Int])
+    , zip' [] ['a','b','c']      ~?= zip' ([] :: [Int]) ['a','b','c']
+    , zip' [] []                 ~?= zip' ([] :: [Int]) ([] :: [Char])
+    , zip' ['a','b','c'] [1,2,3] ~?= zip' ['a','b','c'] [1,2,3]
     ]
 
 --------------------------------------------------------------------------------
